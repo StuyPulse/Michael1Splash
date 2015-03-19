@@ -7,7 +7,7 @@
 
 package edu.stuy;
 
-
+import edu.stuy.Gamepad;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.SimpleRobot;
@@ -21,9 +21,7 @@ import edu.wpi.first.wpilibj.Timer;
  * directory.
  */
 public class Michael1 extends SimpleRobot {
-    Joystick leftStick;
-    Joystick rightStick;
-    Joystick gamepad;
+    Gamepad gamepad;
     RobotDrive drivetrain;
     
     Acquirer acquirer;
@@ -31,9 +29,7 @@ public class Michael1 extends SimpleRobot {
     Paddle paddle;
     
     // USB PORTS
-    static final int LEFT_STICK_PORT = 1;
-    static final int RIGHT_STICK_PORT = 2;
-    static final int GAMEPAD_PORT = 3;
+    static final int GAMEPAD_PORT = 1;
     
     // PWM OUTPUTS
     static final int DRIVE_LEFT_CHANNEL = 1;
@@ -43,11 +39,8 @@ public class Michael1 extends SimpleRobot {
     static final int PADDLE_SERVO_CHANNEL = 5;
     
     public Michael1() {
-        leftStick = new Joystick(LEFT_STICK_PORT);
-        rightStick = new Joystick(RIGHT_STICK_PORT);
-        gamepad = new Joystick(GAMEPAD_PORT);
+        gamepad = new Gamepad(GAMEPAD_PORT);
         drivetrain = new RobotDrive(DRIVE_LEFT_CHANNEL, DRIVE_RIGHT_CHANNEL);
-        
         acquirer = new Acquirer();
         shooter = new Shooter();
         paddle = new Paddle();
@@ -76,28 +69,25 @@ public class Michael1 extends SimpleRobot {
      */
     public void operatorControl() {
         while (isOperatorControl() && isEnabled()) {
-            drivetrain.tankDrive(leftStick, rightStick);
-//            drivetrain.tankDrive(gamepad, 2, gamepad, 4);
+            double left = gamepad.getLeftY();
+            double right = gamepad.getRightY();
+            drivetrain.tankDrive(-left, -right);
             
-            if (leftStick.getTrigger()) {
+            if (gamepad.getLeftTrigger() || gamepad.getRightTrigger()) {
                 acquirer.acquire();
-            }
-            else {
+            } else {
                 acquirer.stop();
             }
-            
-            
-            if (rightStick.getTrigger()) {
+
+            if (gamepad.getLeftBumper() || gamepad.getRightBumper()) {
                 shooter.shoot();
-            }
-            else {
+            } else {
                 shooter.stop();
             }
-            
-            if (leftStick.getRawButton(3)) {
+
+            if (gamepad.getDPadDown() || gamepad.getDPadUp() || gamepad.getDPadLeft() || gamepad.getDPadRight()) {
                 paddle.front();
-            }
-            else {
+            } else {
                 paddle.back();
             }
         }
